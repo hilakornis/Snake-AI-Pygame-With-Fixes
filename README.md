@@ -11,9 +11,9 @@ https://www.youtube.com/watch?v=L8ypSXwyBds
 Original Code: 
 https://github.com/patrickloeber/snake-ai-pytorch/tree/main
 
-The Tutorial showed that we need to also fix : 
+The tutorial also showed that we need to also fix : 
 - snake is in an endless loop.
 - snake traps itself and dies :(
 
-Thank for reading and have a wonderfall rest of the week :) 
+Thank for reading and have a wonderful  rest of the week :) 
 
