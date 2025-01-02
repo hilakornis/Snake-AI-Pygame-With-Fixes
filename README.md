@@ -17,3 +17,12 @@ The tutorial also showed that we need to also fix :
 
 Thank for reading and have a wonderful  rest of the week :) 
 
+after installing the pygame enviroment as the video suggested:
+in conda : 
+```bash
+conda activate pygame_env
+```
+and in the project folder : 
+```bash
+(pygame_env) $ python agent.py
+```
