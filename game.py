@@ -41,22 +41,34 @@ class SnakeGameAI:
         self.display = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
+        self.snake_was_here = None
         self.reset()
         
     
     def reset(self):
         # init game state
         self.direction = Direction.RIGHT
-        
-        self.head = Point(self.w/2, self.h/2)
+
+        self.head = Point(self.w // 2, self.h // 2)
         self.snake = [self.head, 
-                      Point(self.head.x-BLOCK_SIZE, self.head.y),
-                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
-        
+                      Point(self.head.x - BLOCK_SIZE, self.head.y),
+                      Point(self.head.x - (2 * BLOCK_SIZE), self.head.y)]
+
         self.score = 0
         self.food = None
         self._place_food()
         self.frame_iteration = 0
+
+        # Initialize snake_was_here map
+        self.snake_was_here = np.zeros((self.h // BLOCK_SIZE, self.w // BLOCK_SIZE), dtype=int)
+        for pt in self.snake:
+            self._update_snake_was_here(pt)
+
+
+    def _update_snake_was_here(self, pt):
+        x, y = int(pt.x // BLOCK_SIZE), int(pt.y // BLOCK_SIZE)
+        self.snake_was_here[y, x] += 1
+
 
     def _get_dist_head_to_food(self):        
         dist = math.sqrt((self.food.x - self.head.x) ** 2 + (self.food.y - self.head.y) ** 2)//BLOCK_SIZE
@@ -113,14 +125,27 @@ class SnakeGameAI:
         # 4. place new food or just move
         if self.head == self.food:
             self.score += 1
-            reward += 10
+            reward += 100
             self._place_food()
+            # Initialize snake_was_here map
+            self.snake_was_here = np.zeros((self.h // BLOCK_SIZE, self.w // BLOCK_SIZE), dtype=int)
+            for pt in self.snake:
+                self._update_snake_was_here(pt)
         else:
-            self.snake.pop()
+            tail = self.snake.pop()
+            x, y = tail.x // BLOCK_SIZE, tail.y // BLOCK_SIZE
+            self.snake_was_here[y, x] -= 1
         
+        # Penalize revisiting the same spot
+        head_x, head_y = int(self.head.x // BLOCK_SIZE), int(self.head.y // BLOCK_SIZE)
+        if self.snake_was_here[head_y, head_x] > 1:
+            reward -= 1
+
+
         # reward -= 1 * self._get_dist_head_to_center_of_mass()
         reward += 3 - self._get_dist_head_to_food()
         print(f"reward is  {reward}")
+        
         # 5. update ui and clock
         self._update_ui()
         self.clock.tick(SPEED)
@@ -141,17 +166,26 @@ class SnakeGameAI:
         
     def _update_ui(self):
         self.display.fill(BLACK)
-        
+
+        # Visualize snake_was_here map
+        for y in range(self.h // BLOCK_SIZE):
+            for x in range(self.w // BLOCK_SIZE):
+                if self.snake_was_here[y, x] > 0:
+                    alpha = min(255, self.snake_was_here[y, x] * 50)
+                    s = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                    s.set_alpha(alpha)
+                    s.fill((100, 100, 100))  # Gray color
+                    self.display.blit(s, (x * BLOCK_SIZE, y * BLOCK_SIZE))
         for pt in self.snake:
             pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
             pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
-            
+
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
-        
+
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
         pygame.display.flip()
-        
+
     def _move(self, action):
         # [stright, right, left]
 

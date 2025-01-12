@@ -18,7 +18,7 @@ class Agent :
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
         self.model = Linear_QNet(11, 256, 3) # TODO
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-        # TODO: model, trainer
+        
 
 
     def get_state(self, game):
