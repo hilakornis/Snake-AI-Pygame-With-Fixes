@@ -63,6 +63,11 @@ class SnakeGameAI:
         max_dist = math.sqrt(((self.w-BLOCK_SIZE )//BLOCK_SIZE) ** 2 + ((self.h-BLOCK_SIZE )//BLOCK_SIZE ) ** 2)
         return dist*10/max_dist
 
+    def _get_dist_head_to_food_sqrt(self):        
+        dist = math.sqrt((self.food.x - self.head.x) ** 2 + (self.food.y - self.head.y) ** 2)//BLOCK_SIZE
+        max_dist = math.sqrt(((self.w-BLOCK_SIZE )//BLOCK_SIZE) ** 2 + ((self.h-BLOCK_SIZE )//BLOCK_SIZE ) ** 2)
+        return dist*10/max_dist
+
     def _get_dist_head_to_center_of_mass(self):
         sumX = 0
         sumY = 0
@@ -75,6 +80,17 @@ class SnakeGameAI:
         max_dist = math.sqrt(((self.w-BLOCK_SIZE )//BLOCK_SIZE) ** 2 + ((self.h-BLOCK_SIZE )//BLOCK_SIZE ) ** 2)
         return dist/max_dist    
 
+    def _get_dist_head_to_center_of_mass(self, px, py):
+        sumX = 0
+        sumY = 0
+        n = self.snake.__len__()
+        for point in self.snake:
+            sumX += point.x
+            sumY += point.y
+        avgPoint = Point(sumX//n, sumY//n)
+        dist = math.sqrt((avgPoint.x - px) ** 2 + (avgPoint.y - py) ** 2)//BLOCK_SIZE
+        max_dist = math.sqrt(((self.w-BLOCK_SIZE )//BLOCK_SIZE) ** 2 + ((self.h-BLOCK_SIZE )//BLOCK_SIZE ) ** 2)
+        return dist/max_dist
 
 
 
@@ -119,8 +135,8 @@ class SnakeGameAI:
             self.snake.pop()
         
         # reward -= 1 * self._get_dist_head_to_center_of_mass()
-        reward += 3 - self._get_dist_head_to_food()
-        print(f"reward is  {reward}")
+        # reward += 3 - self._get_dist_head_to_food()
+        # print(f"reward is  {reward}")
         # 5. update ui and clock
         self._update_ui()
         self.clock.tick(SPEED)
@@ -180,6 +196,8 @@ class SnakeGameAI:
         elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
             
+        
         self.head = Point(x, y)
-            
+        
+        
 
